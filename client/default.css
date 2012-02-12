@@ -1,0 +1,28 @@
+.next_button
+{
+	width:32px;
+	height:32px;
+
+	position:relative;
+	float:left;
+
+	margin-left:5px
+}
+
+.audio
+{
+	position:relative;
+	float:left;
+}
+
+.tags_div
+{
+	margin-top:3px;
+	margin-bottom:3px;
+}
+
+.audio_div
+{
+	margin-top:3px;
+	margin-bottom:3px;
+}

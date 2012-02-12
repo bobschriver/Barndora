@@ -1,0 +1,13 @@
+TODO:
+
+DATABASE / SCREEN SCRAPING
+Grab location tags
+Get related tags for each tag, store them in database
+
+WEBAPP
+Get Websockets working
+Get API working
+Serve up a random song
+Serve up a song based on one tag
+Serve up a song based on many tags
+

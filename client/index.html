@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<script src="music.js" type="text/javascript"></script>
+<link href="default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onload="init()">
+
+<h2> Bandora </h2>
+
+<div id='tags_div' class='tags_div'>
+<label> Tags </label>
+<input type="text" id="tags" onchange="submit_tags()"></input>
+</div>
+
+</br>
+<div id = 'audio_div' class = 'audio_div'>
+<audio id="player" class="audio" onended="next()" autoplay controls>No Audio?</audio>
+<button id="next_button" class="next_button" onclick="next()">>></button>
+</div>
+</body>
+</html>
