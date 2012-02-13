@@ -72,11 +72,45 @@ EventMachine::WebSocket.start(:host => "0.0.0.0", :port => 2015) do |ws|
 				album = JSON.parse(album_data)
 
 				track = album['tracks'].sample
+			
+				track['album_name'] = album['title']
+			       track['album_url'] = album['url']	
+			end
+
+			band_id = track['band_id']
+			
+			band_info_api_base = "http://api.bandcamp.com/api/band/3/info?key=#{$key}&band_id="
+			band_info_api_url = band_info_api_base + band_id.to_s
+			
+			band_response = Net::HTTP.get_response(URI.parse(band_info_api_url))
+			band_data = band_response.body
+			band_json = JSON.parse(band_data)
+
+			puts band_json
+
+			track['band_name'] = band_json['name']
+			track['band_url'] = band_json['url']
+
+			puts track
+
+			if track.has_key? 'album_name'
+
+				album_id = track['album_id']
+				album_api_base = "http://api.bandcamp.com/api/album/2/info?key=#{$key}&album_id="
+				album_api_url = album_api_base + album_id.to_s
+
+				album_response = Net::HTTP.get_response(URI.parse(album_api_url))
+				album_data = album_response.body
+				album = JSON.parse(album_data)
+
+				track['album_name'] = album['title']
+			       	track['album_url'] = album['url']	
+	
 			end
 
 			puts track
 
-			ws.send track['streaming_url']
+			ws.send track.to_json.to_s
 	
 		else
 			@tags = msg.split(',')

@@ -21,8 +21,14 @@
 	margin-bottom:3px;
 }
 
+.track_link
+{
+	margin-left:2px;
+	margin-right:2px;
+}
+
 .audio_div
 {
-	margin-top:3px;
-	margin-bottom:3px;
+	/*margin-top:3px;
+	margin-bottom:3px;*/
 }
