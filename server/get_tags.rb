@@ -20,13 +20,13 @@ db = SQLite3::Database.new( "data/bandcamp_tags.db" )
 puts(db)
 
 
-genre_tags.each do
+location_tags.each do
 	|tag_name_url|
 
 	tag_url = tag_name_url[0]
 	tag_name = tag_name_url[1]
 
-	current_count = 
+	current_count = 0 
 
 	begin
 	db.execute("insert into tags (tag) values (\"" + tag_name + "\");")
@@ -43,8 +43,8 @@ genre_tags.each do
 
 	max_page = tag_page.css('span.pagenum').map{|span| span.text}[-1].to_i
 
-	if max_page > 25
-		max_page = 25
+	if max_page > 10
+		max_page = 10
 	end
 
 	puts("Genre " + tag_name)
@@ -69,13 +69,12 @@ genre_tags.each do
 		select_url_id = db.prepare("select url_id from urls where url = ?")
 
 
-		db.transaction do |t|
 			album_urls.each do
 				|album_url|
 
 			
 				begin
-					t.execute("insert into urls (url) values (\"" + album_url + "\");")
+					db.execute("insert into urls (url) values (\"" + album_url + "\");")
 				#insert_url.execute("\"" + album_url + "\"")
 				#url_id = db.last_insert_row_id()
 
@@ -84,12 +83,11 @@ genre_tags.each do
 				#select_url_id.execute("\"" + album_url + "\"")
 				end
 
-				url_id = t.execute("select url_id from urls where url=\"" + album_url + "\";")[0][0]
+				url_id = db.execute("select url_id from urls where url=\"" + album_url + "\";")[0][0]
 			
 				#insert_tags.execute(url_id , tag_id)
-				t.execute("insert into url_tags (url_id , tag_id) values(@key , #{tag_id});")
+				db.execute("insert into url_tags (url_id , tag_id) values(#{url_id} , #{tag_id});")
 
-		end
 		end
 
 	end
