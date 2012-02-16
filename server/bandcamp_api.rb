@@ -1,7 +1,7 @@
 require './api_key.rb'
 
-#require 'rubygems'
-#require 'bundler/setup'
+require 'rubygems'
+require 'bundler/setup'
 
 require 'singleton'
 require 'json'
@@ -26,7 +26,7 @@ class BandcampAPI
 	def band_info(band_id)
 		band_info = @db.execute("select * from band_info where band_id = #{band_id.to_s}")
 
-		if band_info.nil?
+		if band_info.empty?
 			band_info_url = BAND_INFO_URL_BASE + band_id.to_s
 			band_info_json = get_json(band_info_url)
 
@@ -36,13 +36,27 @@ class BandcampAPI
 			url = (band_info_json.has_key? 'url') ? band_info_json['url'] : 'NULL'
 			offsite_url = (band_info_json.has_key? 'offsite_url') ? band_info_json['offsite_url'] : 'NULL'	
 			
-			query = "insert into band_info (band_id , name , subdomain , url , offsite_url) values(#{band_id.to_s} , #{name} , #{subdomain} , #{url} , #{offsite_url})"
+			query = "insert into band_info (band_id , name , subdomain , url , offsite_url) values(? , ? , ? , ? , ?)"
 
 			puts query
 
-			@db.execute(query)
+			band_insert = @db.prepare(query)
+
+			band_insert.execute(band_id , name , subdomain , url , offsite_url)
 		else
-			#should put something here???
+			band_info_json = Hash.new
+		
+			band_info_json['band_id'] = band_info[0][0]
+			band_info_json['name'] = band_info[0][1]
+			band_info_json['subdomain'] = band_info[0][2]
+			
+			if band_info[0][3].nil?
+				band_info_json['url'] = band_info[0][3]
+			end
+
+			if band_info[0][4].nil?
+				band_info_json['offsite_url'] = band_info[0][4]
+			end
 		end
 
 		return band_info_json

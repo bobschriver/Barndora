@@ -10,7 +10,13 @@ urls = db.execute("select * from urls")
 urls.each do
 	|url|
 	
+	if url[0] > 25000
+		exit
+	end
+
 	url_json = BandcampAPI.instance.url_info(url[1])
+
+	
 
 
 	if url_json.has_key? 'track_id' 
@@ -21,8 +27,15 @@ urls.each do
 		next
 	end
 
-	puts "URL " + url[0].to_s + " " + url[1].to_s
-	puts "Tracks " + tracks.length.to_s
+
+	if tracks.nil?
+		puts "Tracks is nil, some sort of problem?"
+		next
+	end
+
+	puts "URL " + url[0].to_s + " " + url[1].to_s	
+	puts "Number of tracks" + tracks.length.to_s
+	tracks.map{|track| puts track['track_id']}
 
 	db.transaction do
 
@@ -34,12 +47,10 @@ urls.each do
 			track_id = track['track_id']
 		
 			#Need to insert all these tags into a new track_tags table
-
 			tags.each do
 				|tag_id|
 				db.execute("insert into track_tags (track_id , tag_id) values(#{track_id} , #{tag_id})")
 			end
 		end
 	end
-	sleep(1)
 end

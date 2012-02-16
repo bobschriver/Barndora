@@ -9,26 +9,41 @@
 
 <body onload="init()">
 
-<h2> Bandora </h2>
+<h1 id="header" class="header"> Bandora </h1>
+
+<div id = "interface" class = "interface">
 
 <div id='tags_div' class='tags_div'>
-<label> Tags </label>
-<input type="text" id="tags" onchange="submit_tags()"></input>
+	<input type="text" id="tags" class="tags" onchange="submit_tags()"></input>
 </div>
 
-</br>
-
-<div id = "track_links">
-<a id = "band_url" class="track_link" href=""></a>
-<a id = "album_url" class="track_link" href=""></a>
-<a id = "track_url" class = track_link" href=""></a>
+<div id = "art_div" class = "art_div">
+	<img id = "art_img" class = "art_img" src=""></img>
 </div>
 
-</br>
+<div id = "audio_div" class = "audio_div">
 
-<div id = 'audio_div' class = 'audio_div'>
-<audio id="player" class="audio" onended="next()" autoplay controls>No Audio?</audio>
-<button id="next_button" class="next_button" onclick="next()">>></button>
+<div id = "track_links" class = "track_links">
+	<a id = "band_url" class="track_link" href=""></a></br>
+	<a id = "album_url" class="track_link" href=""></a></br>
+	<a id = "track_url" class = track_link" href=""></a></br>
 </div>
+
+
+<div id = "audio_player" class = "audio_player">
+	<audio id="player" class="audio" onended="next()" autoplay controls>No Audio?</audio>
+	<button id="next_button" class="next_button" onclick="next()">>></button>
+</div>
+
+
+<div id = "rate_div" class = "rate_div">
+	<button id = "yup" class = "rate_button" onclick="rate_yup(this)">yup</button>
+	<button id = "nope" class = "rate_button" onclick="rate_nape(this)">nope</button>
+</div>
+
+</div>
+
+</div>
+
 </body>
 </html>

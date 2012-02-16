@@ -20,7 +20,7 @@ db = SQLite3::Database.new( "data/bandcamp_tags.db" )
 puts(db)
 
 
-location_tags.each do
+genre_tags.each do
 	|tag_name_url|
 
 	tag_url = tag_name_url[0]

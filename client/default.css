@@ -6,7 +6,35 @@
 	position:relative;
 	float:left;
 
-	margin-left:5px
+	margin-left:4px
+}
+
+.header
+{
+	text-align:center;
+}
+
+.interface
+{
+	width:470px;
+	height:400px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.tags_div
+{
+	width:468px;
+	height:32px;
+	margin-bottom:5px;
+}
+
+.tags
+{
+	width:462px;
+	height:26px;
+	
+	font-size:18px;
 }
 
 .audio
@@ -15,10 +43,11 @@
 	float:left;
 }
 
-.tags_div
+.track_links
 {
-	margin-top:3px;
-	margin-bottom:3px;
+	margin-bottom:2px;
+	width:336px;
+	height:64px;
 }
 
 .track_link
@@ -27,8 +56,42 @@
 	margin-right:2px;
 }
 
+.audio_player
+{
+	margin-bottom:2px;
+
+	height:32px;
+	width:336px;
+}
+
+.rate_div
+{
+}
+
+.rate_button
+{
+	width:166px;
+	height:32px;
+}
+
 .audio_div
 {
-	/*margin-top:3px;
-	margin-bottom:3px;*/
+	position:relative;
+	float:left;
+}
+
+.art_div
+{
+	position:relative;
+	float:left;
+	width:132px;
+	height:132px;
+
+	margin-right:2px;
+}
+
+.art_img
+{
+	width:132px;
+	height:132px;
 }

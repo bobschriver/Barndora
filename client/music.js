@@ -21,13 +21,16 @@ function onMessage(evt)
 	var track_url = document.getElementById('track_url')
 	track_url.href = parse_json.band_url + parse_json.url
 	track_url.innerHTML = parse_json.title
+
+	var track_art = document.getElementById('art_img')
+	track_art.src = parse_json.large_art_url
 }
 
 function onOpen(evt)
 {
 	var input = document.getElementById('tags')
-	input.value = 'rock'
-
+	input.value = 'rock,California'
+	
 	submit_tags()
 }
 
