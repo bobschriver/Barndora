@@ -7,6 +7,13 @@ function onMessage(evt)
 	var parse_json = eval('(' + json + ')')
 
 
+
+	if(parse_json.error_type != null)
+	{
+		alert(parse_json.error_message)
+	}
+	else
+	{
 	var audio = document.getElementById('player')
 	audio.src = parse_json.streaming_url
 
@@ -26,6 +33,7 @@ function onMessage(evt)
 	track_art.src = parse_json.large_art_url
 
 	reset()
+	}
 }
 
 function onOpen(evt)

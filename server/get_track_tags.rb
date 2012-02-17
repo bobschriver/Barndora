@@ -10,8 +10,12 @@ urls = db.execute("select * from urls")
 urls.each do
 	|url|
 	
-	if url[0] > 25000
+	if url[0] > 50000
 		exit
+	end
+
+	if url[0] < 29130
+		next
 	end
 
 	url_json = BandcampAPI.instance.url_info(url[1])
@@ -20,13 +24,28 @@ urls.each do
 
 
 	if url_json.has_key? 'track_id' 
-		tracks = [BandcampAPI.instance.track_info(url_json['track_id'])]
+		tracks_info = BandcampAPI.instance.track_info(url_json['track_id'])
+		if tracks_info.has_key? 'error'
+			puts "Some sort of error!"
+			next
+		end
+
+		tracks = [tracks_info]
+
 	elsif url_json.has_key? 'album_id'
-		tracks = BandcampAPI.instance.album_info(url_json['album_id'])['tracks']
+		album_info = BandcampAPI.instance.album_info(url_json['album_id'])
+
+		if album_info.has_key? 'error'
+			puts "Some sort of error!"
+			next
+		end
+
+		tracks = album_info['tracks']
 	else
 		next
 	end
 
+	puts tracks
 
 	if tracks.nil?
 		puts "Tracks is nil, some sort of problem?"
@@ -53,4 +72,5 @@ urls.each do
 			end
 		end
 	end
+	sleep(1)
 end

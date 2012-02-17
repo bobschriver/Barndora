@@ -38,7 +38,6 @@ class BandcampAPI
 			
 			query = "insert into band_info (band_id , name , subdomain , url , offsite_url) values(? , ? , ? , ? , ?)"
 
-			puts query
 
 			band_insert = @db.prepare(query)
 
@@ -70,7 +69,11 @@ class BandcampAPI
 		if album_info.empty?
 			album_info_url = ALBUM_INFO_URL_BASE + album_id.to_s
 			album_info_json =  get_json(album_info_url)
-			
+		
+			if album_info_json.has_key? 'error'
+				return album_info_json
+			end
+
 			title = (album_info_json.has_key? 'title') ? album_info_json['title'] : 'NULL'
 			release_date = (album_info_json.has_key? 'release_date') ? album_info_json['release_date'] : 'NULL'
 			downloadable = (album_info_json.has_key? 'downloadable') ? album_info_json['downloadable'] : 'NULL'
@@ -85,7 +88,6 @@ class BandcampAPI
 
 			query = "insert into album_info (album_id , title , release_date , downloadable , url , tracks , small_art_url , large_art_url , artist , band_id) values(? , ? , ? , ? , ? , ? , ? , ? , ? , ?)"
 
-			puts query
 
 			album_insert = @db.prepare(query)
 			
@@ -120,7 +122,12 @@ class BandcampAPI
 		if track_info.empty?
 			track_info_url = TRACK_INFO_URL_BASE + track_id.to_s
 			track_info_json =  get_json(track_info_url)
-			
+		
+
+			if track_info_json.has_key? 'error'
+				return track_info_json
+			end
+
 			track_id = (track_info_json.has_key? 'track_id') ? track_info_json['track_id'] : 'NULL'
 			release_date = (track_info_json.has_key? 'release_date') ? track_info_json['release_date'] : 'NULL'
 			downloadable = (track_info_json.has_key? 'downloadable') ? track_info_json['downloadable'] : 'NULL'
@@ -135,7 +142,6 @@ class BandcampAPI
 	
 			
 			query = "insert into track_info (track_id, release_date, downloadable, url, streaming_url, lyrics, small_art_url, large_art_url, band_id, album_id, duration) values (? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ?)"
-			puts query
 
 			track_insert = @db.prepare(query)
 
@@ -204,7 +210,6 @@ class BandcampAPI
 			
 			query = "insert into url_info (url , band_id , album_id , track_id) values (\'#{url}\' , #{band_id} , #{album_id} , #{track_id})"
 
-			puts query
 
 			@db.execute(query)
 		else

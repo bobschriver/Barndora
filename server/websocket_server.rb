@@ -38,22 +38,25 @@ class WebsocketServer < EM::WebSocket::Connection
 			rating = args.to_i
 
 			if not defined?(@prev_track).nil?
-				current_rating_query = "select rating from track_ratings where track_one = #{@prev_track} and track_two = #{@curr_track}"
+				current_rating_query = "select rating,num_ratings from track_ratings where track_one = #{@prev_track} and track_two = #{@curr_track}"
 
-				current_rating = @db.execute(current_rating_query)
+				rating_info = @db.execute(current_rating_query)
 
 
 				#Could probably do an insert or update sql thing here
-				if current_rating.empty?
-					insert_rating_query = "insert into track_ratings (track_one , track_two , rating) values(#{@prev_track} , #{@curr_track} , #{rating})"
+				if rating_info.empty?
+					insert_rating_query = "insert into track_ratings (track_one , track_two , rating , num_ratings) values(#{@prev_track} , #{@curr_track} , #{rating} , #{1})"
 
 					puts insert_rating_query
 
 					@db.execute(insert_rating_query)
 				else
-					new_rating = (rating + current_rating[0][0].to_i) / 2
+					current_rating = rating_info[0][0]
+					num_ratings = rating_info[0][1]
 
-					update_rating_query = "update track_ratings set rating = #{new_rating} where track_one = #{@prev_track} and track_two = #{@curr_track}"
+					new_rating = (rating + current_rating.to_i) / num_ratings
+
+					update_rating_query = "update track_ratings set rating = #{new_rating} , num_ratings = #{num_ratings + 1} where track_one = #{@prev_track} and track_two = #{@curr_track}"
 
 					puts update_rating_query
 
@@ -64,46 +67,112 @@ class WebsocketServer < EM::WebSocket::Connection
 			end
 
 			if not defined?(@curr_track).nil?
-				@prev_track = @curr_track
+
+				#Don't update the previous track unless they liked it. In this way we work off the last track they liked
+				if rating > 0
+					@prev_track = @curr_track
+				end
 			end
 
 			tag_query = "select tag_id from tags"
 
 			#If we don't have any tags defined, just select them all
 			if not defined?(@tags).nil? and not @tags.empty?
-				tag_query += " where tag in (\'#{@tags.join('\',\'')}\');"
+				tag_query += " where tag in (\'#{@tags.join("\' , \'")}\')"
 			end
+			
+			puts tag_query
 
 			tag_ids = @db.execute(tag_query)
 
-			#Need to select all tracks with those tags	
-			track_id_query = "select track_id from track_tags where tag_id in (\'#{tag_ids.join('\',\'')}\');"
+			if tag_ids.empty?
+				error = Hash.new
+				error['error_type'] = 'no_tags'
+				error['error_message'] = "Sorry, those genres are too hip. I don't have any of those genres indexed!"
+		
+				puts "Couldn't find tags"
+
+				send error.to_json.to_s
+
+				return
+			end	
+
+			track_id_query = ""
+
+			#Need to select all tracks with those tags
+			tag_ids.each do 
+				|tag_id|
+				track_id_query += "select track_id from track_tags where tag_id = #{tag_id[0]}"
+
+				if not tag_id.eql? tag_ids[-1]
+					track_id_query += " #{@tag_selector} "
+				end
+			end
+
+			puts track_id_query			
+			
 			track_ids = @db.execute(track_id_query)
 
-			puts "Found #{track_ids.length} tracks"
+			#track_id_query = "select track_id from track_tags where tag_id in ( ? )"
+			#track_id_exec = @db.prepare(track_id_query)
+
+
+			#track_ids = track_id_exec.execute(tag_ids.join('\',\''))
+
+
+			#puts "Found #{track_ids.length} tracks"
 			
 			if track_ids.empty?
 				error = Hash.new
-				error['error_type'] = 'no_results'
+				error['error_type'] = 'no_tracks'
 				error['error_message'] = "Sorry, those tags are too hip. I can't find any tracks that match them!"
 
-				return error
+				puts "Couldnt find tracks"
+
+				send error.to_json.to_s
+
+				return
 			end
 
 			#Here is where we would put any sort of weighted choice on tracks, rather than random sampling
 			#Currently, tracks with more tags in the desired tags will show up more
+			
+			
+			weighted_track_ids = Array.new
+			if not defined?(@prev_track).nil?
+				get_ratings_query = "select track_two, rating , num_ratings from track_ratings where track_one = #{@prev_track}"
+
+				curr_ratings = @db.execute(get_ratings_query)
+
+				if not curr_ratings.empty?
+					
+					puts "WHOAH FOUND A MATCH FOR RATINGS"
+					ratings_intersection = curr_ratings.keep_if {|current_rating| track_ids.include?(current_rating[0])}
+
+					puts ratings_intersection
+
+					weighted_track_ids = ratings_intersection.map{|current_rating| Array.new(current_rating[0] , current_rating[1])}.flatten
+
+					puts weighted_track_ids
+			
+				end
+			end
+			track_ids = track_ids + weighted_track_ids
+
+			puts "Found #{track_ids.length}"
+
 			track_id = track_ids.sample[0] 
 			
 			#Get the track info
 			track = BandcampAPI.instance.track_info(track_id)
-			puts track	
+
 
 			#Need to return the album info
 			album_id = track['album_id']
 			album = BandcampAPI.instance.album_info(album_id)
-			puts album
 			
 			track['album_name'] = album['title']
+		
 			track['album_url'] = album['url']	
 			
 			if not track.has_key? 'large_art_url'
@@ -115,16 +184,18 @@ class WebsocketServer < EM::WebSocket::Connection
 			#Need to return the band info
 			band_id = track['band_id']
 			band = BandcampAPI.instance.band_info(band_id)
-			puts band
 			
 			track['band_name'] = band['name']
+			
 			if band.has_key? 'url'
 				track['band_url'] = band['url']
 			else
 				track['band_url'] = 'http://' + band['subdomain'] + '.bandcamp.com'
 			end
 
-			puts "Track " + track['title'] + " Album " + track['album_name'] + " Band " + track['band_name']
+			#puts "Track " + track['title'] 
+			#puts "Album " + track['album_name'] 
+			#puts "Band " + track['band_name']
 
 			@curr_track = track_id
 
@@ -135,8 +206,17 @@ class WebsocketServer < EM::WebSocket::Connection
 			#We should probably reset the current track here
 			
 			#Lets assume for now that something bad isn't in tags
-			@tags = args.split(',')
+			@tags = args.gsub! /"/ , ''
 
+			if @tags.nil?
+				@tag_selector = 'UNION'
+				@tags = args.split(',')
+			else
+				@tag_selector = 'INTERSECT'
+				@tags = @tags.split(',')
+			end
+
+		
 		end
 	end
 
