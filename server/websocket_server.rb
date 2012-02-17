@@ -29,8 +29,44 @@ class WebsocketServer < EM::WebSocket::Connection
 	end
 
 	def onmessage(msg)
-		if msg.eql? "next"  
+		command , args = msg.split(':')
 			
+		puts "Command " + command + " Args " + args
+
+		if command.eql? "next"  
+
+			rating = args.to_i
+
+			if not defined?(@prev_track).nil?
+				current_rating_query = "select rating from track_ratings where track_one = #{@prev_track} and track_two = #{@curr_track}"
+
+				current_rating = @db.execute(current_rating_query)
+
+
+				#Could probably do an insert or update sql thing here
+				if current_rating.empty?
+					insert_rating_query = "insert into track_ratings (track_one , track_two , rating) values(#{@prev_track} , #{@curr_track} , #{rating})"
+
+					puts insert_rating_query
+
+					@db.execute(insert_rating_query)
+				else
+					new_rating = (rating + current_rating[0][0].to_i) / 2
+
+					update_rating_query = "update track_ratings set rating = #{new_rating} where track_one = #{@prev_track} and track_two = #{@curr_track}"
+
+					puts update_rating_query
+
+					@db.execute(update_rating_query)
+				end
+
+
+			end
+
+			if not defined?(@curr_track).nil?
+				@prev_track = @curr_track
+			end
+
 			tag_query = "select tag_id from tags"
 
 			#If we don't have any tags defined, just select them all
@@ -45,6 +81,14 @@ class WebsocketServer < EM::WebSocket::Connection
 			track_ids = @db.execute(track_id_query)
 
 			puts "Found #{track_ids.length} tracks"
+			
+			if track_ids.empty?
+				error = Hash.new
+				error['error_type'] = 'no_results'
+				error['error_message'] = "Sorry, those tags are too hip. I can't find any tracks that match them!"
+
+				return error
+			end
 
 			#Here is where we would put any sort of weighted choice on tracks, rather than random sampling
 			#Currently, tracks with more tags in the desired tags will show up more
@@ -74,17 +118,25 @@ class WebsocketServer < EM::WebSocket::Connection
 			puts band
 			
 			track['band_name'] = band['name']
-			track['band_url'] = band['url']
+			if band.has_key? 'url'
+				track['band_url'] = band['url']
+			else
+				track['band_url'] = 'http://' + band['subdomain'] + '.bandcamp.com'
+			end
 
 			puts "Track " + track['title'] + " Album " + track['album_name'] + " Band " + track['band_name']
 
-			@prev_track = track_id
+			@curr_track = track_id
 
 			send track.to_json.to_s
 	
-		else
+		elsif command.eql? 'tags'
+			
+			#We should probably reset the current track here
+			
 			#Lets assume for now that something bad isn't in tags
-			@tags = msg.split(',')
+			@tags = args.split(',')
+
 		end
 	end
 

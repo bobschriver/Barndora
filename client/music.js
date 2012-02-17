@@ -24,6 +24,8 @@ function onMessage(evt)
 
 	var track_art = document.getElementById('art_img')
 	track_art.src = parse_json.large_art_url
+
+	reset()
 }
 
 function onOpen(evt)
@@ -41,15 +43,17 @@ function init()
 	//websocket.onclose = function(evt) { onClose(evt) }; 
 	websocket.onmessage = function(evt) { onMessage(evt) }; 
 	//websocket.onerror = function(evt) { onError(evt) };
+
+	current_rating = 1
+	yup_depressed = 0
+	nope_depressed = 1
 }
 
-function add_tag()
-{
-}
 
 function next()
 {
-	websocket.send("next")
+	var command = "next" + ":" + current_rating
+	websocket.send(command)
 }
 
 function submit_tags()
@@ -58,7 +62,79 @@ function submit_tags()
 
 	var tags = input.value
 
-	websocket.send(tags)
+	var command = "tags" + ":" + tags
+
+	websocket.send(command)
 	next()
 }
 
+
+
+function rate_yup(button)
+{
+	if(yup_depressed == 1)
+	{
+		yup_depressed = 0
+		button.className = 'yup_undepressed'
+	
+		current_rating = 1
+	}
+	else
+	{
+		yup_depressed = 1
+		button.className = 'yup_depressed'
+	
+		current_rating = 5
+	}
+
+	if(nope_depressed == 1)
+	{
+		nope_depressed = 0
+		nope_button = document.getElementById('nope')
+		nope_button.className = 'nope_undepressed'
+	}
+}
+
+function rate_nope(button)
+{
+	if(nope_depressed == 1)
+	{
+		nope_depressed = 0
+		button.className = 'nope_undepressed'
+	
+		current_rating = 0	
+	}
+	else
+	{
+		nope_depressed = 1
+		button.className = 'nope_depressed'
+	
+	
+		current_rating = 0
+	}
+	
+	if(yup_depressed == 1)
+	{
+		yup_depressed = 1
+		yup_button = document.getElementById('yup')
+		yup_button.className = 'yup_undepressed'
+	}
+
+
+	next()
+}
+
+function reset()
+{
+
+	yup_button = document.getElementById('yup')
+	nope_button = document.getElementById('nope')
+
+	yup_depressed = 0
+	yup_button.className = 'yup_undepressed'
+
+	nope_depressed = 0
+	nope_button.className = 'nope_undepressed'
+
+	current_rating = 1
+}

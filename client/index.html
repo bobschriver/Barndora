@@ -23,12 +23,6 @@
 
 <div id = "audio_div" class = "audio_div">
 
-<div id = "track_links" class = "track_links">
-	<a id = "band_url" class="track_link" href=""></a></br>
-	<a id = "album_url" class="track_link" href=""></a></br>
-	<a id = "track_url" class = track_link" href=""></a></br>
-</div>
-
 
 <div id = "audio_player" class = "audio_player">
 	<audio id="player" class="audio" onended="next()" autoplay controls>No Audio?</audio>
@@ -37,8 +31,14 @@
 
 
 <div id = "rate_div" class = "rate_div">
-	<button id = "yup" class = "rate_button" onclick="rate_yup(this)">yup</button>
-	<button id = "nope" class = "rate_button" onclick="rate_nape(this)">nope</button>
+	<button id = "yup" class = "yup_undepressed" onclick="rate_yup(this)">yup</button>
+	<button id = "nope" class = "nope_undepressed" onclick="rate_nope(this)">nope</button>
+</div>
+
+<div id = "track_links" class = "track_links">
+	<a id = "band_url" class="track_link" href=""></a></br>
+	<a id = "album_url" class="track_link" href=""></a></br>
+	<a id = "track_url" class = track_link" href=""></a></br>
 </div>
 
 </div>
