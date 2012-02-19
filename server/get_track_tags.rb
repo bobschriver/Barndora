@@ -14,7 +14,7 @@ urls.each do
 		exit
 	end
 
-	if url[0] < 29130
+	if url[0] < 48920
 		next
 	end
 

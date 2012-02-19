@@ -22,6 +22,9 @@ class WebsocketServer < EM::WebSocket::Connection
 		@onopen    = method(:onopen)
 		@onmessage = method(:onmessage)
 		@onclose   = method(:onclose)
+	
+		@prev_tags = nil
+		@prev_tag_selector = nil
 	end
 
 	def onopen()
@@ -37,107 +40,24 @@ class WebsocketServer < EM::WebSocket::Connection
 
 			rating = args.to_i
 
-			if not defined?(@prev_track).nil?
-				current_rating_query = "select rating,num_ratings from track_ratings where track_one = #{@prev_track} and track_two = #{@curr_track}"
+			update_ratings(rating)
 
-				rating_info = @db.execute(current_rating_query)
-
-
-				#Could probably do an insert or update sql thing here
-				if rating_info.empty?
-					insert_rating_query = "insert into track_ratings (track_one , track_two , rating , num_ratings) values(#{@prev_track} , #{@curr_track} , #{rating} , #{1})"
-
-					puts insert_rating_query
-
-					@db.execute(insert_rating_query)
-				else
-					current_rating = rating_info[0][0]
-					num_ratings = rating_info[0][1]
-
-					new_rating = (rating + current_rating.to_i) / num_ratings
-
-					update_rating_query = "update track_ratings set rating = #{new_rating} , num_ratings = #{num_ratings + 1} where track_one = #{@prev_track} and track_two = #{@curr_track}"
-
-					puts update_rating_query
-
-					@db.execute(update_rating_query)
-				end
-
-
-			end
-
-			if not defined?(@curr_track).nil?
-
-				#Don't update the previous track unless they liked it. In this way we work off the last track they liked
-				if rating > 0
-					@prev_track = @curr_track
-				end
-			end
-
-			tag_query = "select tag_id from tags"
-
-			#If we don't have any tags defined, just select them all
-			if not defined?(@tags).nil? and not @tags.empty?
-				tag_query += " where tag in (\'#{@tags.join("\' , \'")}\')"
-			end
+			#Need to check if we have the same tags here
+			tag_ids = get_tags()
 			
-			puts tag_query
-
-			tag_ids = @db.execute(tag_query)
-
 			if tag_ids.empty?
-				error = Hash.new
-				error['error_type'] = 'no_tags'
-				error['error_message'] = "Sorry, those genres are too hip. I don't have any of those genres indexed!"
-		
-				puts "Couldn't find tags"
-
-				send error.to_json.to_s
-
 				return
-			end	
-
-			track_id_query = ""
-
-			#Need to select all tracks with those tags
-			tag_ids.each do 
-				|tag_id|
-				track_id_query += "select track_id from track_tags where tag_id = #{tag_id[0]}"
-
-				if not tag_id.eql? tag_ids[-1]
-					track_id_query += " #{@tag_selector} "
-				end
 			end
 
-			puts track_id_query			
-			
-			track_ids = @db.execute(track_id_query)
+			track_ids = get_tracks(tag_ids)
 
-			#track_id_query = "select track_id from track_tags where tag_id in ( ? )"
-			#track_id_exec = @db.prepare(track_id_query)
-
-
-			#track_ids = track_id_exec.execute(tag_ids.join('\',\''))
-
-
-			#puts "Found #{track_ids.length} tracks"
-			
 			if track_ids.empty?
-				error = Hash.new
-				error['error_type'] = 'no_tracks'
-				error['error_message'] = "Sorry, those tags are too hip. I can't find any tracks that match them!"
-
-				puts "Couldnt find tracks"
-
-				send error.to_json.to_s
-
 				return
 			end
 
 			#Here is where we would put any sort of weighted choice on tracks, rather than random sampling
 			#Currently, tracks with more tags in the desired tags will show up more
-			
-			
+				
 			weighted_track_ids = Array.new
 			if not defined?(@prev_track).nil?
 				get_ratings_query = "select track_two, rating , num_ratings from track_ratings where track_one = #{@prev_track}"
@@ -214,10 +134,116 @@ class WebsocketServer < EM::WebSocket::Connection
 			else
 				@tag_selector = 'INTERSECT'
 				@tags = @tags.split(',')
+			end	
+		end
+	end
+
+
+	def update_ratings(rating)
+		if not defined?(@prev_track).nil?
+			current_rating_query = "select rating,num_ratings from track_ratings where track_one = #{@prev_track} and track_two = #{@curr_track}"
+
+			rating_info = @db.execute(current_rating_query)
+
+
+			#Could probably do an insert or update sql thing here
+			if rating_info.empty?
+				insert_rating_query = "insert into track_ratings (track_one , track_two , rating , num_ratings) values(#{@prev_track} , #{@curr_track} , #{rating} , #{1})"
+
+				puts insert_rating_query
+
+				@db.execute(insert_rating_query)
+			else
+				current_rating = rating_info[0][0]
+				num_ratings = rating_info[0][1]
+
+				new_rating = (rating + current_rating.to_i) / num_ratings
+
+				update_rating_query = "update track_ratings set rating = #{new_rating} , num_ratings = #{num_ratings + 1} where track_one = #{@prev_track} and track_two = #{@curr_track}"
+
+				puts update_rating_query
+
+				@db.execute(update_rating_query)
+			end
+		end
+
+		if not defined?(@curr_track).nil?
+
+			#Don't update the previous track unless they liked it. In this way we work off the last track they liked
+			if rating > 0
+				@prev_track = @curr_track
+			end
+		end
+
+
+	end
+
+	def get_tags()
+		tag_query = "select tag_id from tags"
+
+		#If we don't have any tags defined, just select them all
+		if not defined?(@tags).nil? and not @tags.empty?
+			tag_query += " where tag in (\'#{@tags.join("\' , \'")}\')"
+		end
+			
+		puts tag_query
+
+		tag_ids = @db.execute(tag_query)
+
+		if tag_ids.empty?
+			error = Hash.new
+			error['error_type'] = 'no_tags'
+			error['error_message'] = "Sorry, those genres are too hip. I don't have any of those genres indexed!"
+		
+			puts "Couldn't find tags"
+
+			send error.to_json.to_s
+		
+			@tags = @prev_tags
+		end
+
+		return tag_ids
+	end
+
+	def get_tracks(tag_ids)
+		if @tags.eql? @prev_tags and @tag_selector.eql? @prev_tag_selector
+
+			track_ids = @prev_tracks
+		else
+			@prev_tags = @tags
+			@orev_tag_selector = @tag_selector
+
+			track_id_query = ""
+
+			#Need to select all tracks with those tags
+			tag_ids.each do 
+				|tag_id|
+				track_id_query += "select track_id from track_tags where tag_id = #{tag_id[0]}"
+
+				if not tag_id.eql? tag_ids[-1]
+					track_id_query += " #{@tag_selector} "
+				end
 			end
 
-		
+			puts track_id_query			
+			
+			track_ids = @db.execute(track_id_query)
+			
+
+			if track_ids.empty?
+				error = Hash.new
+				error['error_type'] = 'no_tracks'
+				error['error_message'] = "Sorry, those tags are too hip. I can't find any tracks that match them!"
+
+				puts "Couldnt find tracks"
+
+				send error.to_json.to_s
+			else	
+				@prev_tracks = track_ids
+			end
 		end
+
+		return track_ids
 	end
 
 	def onclose()
