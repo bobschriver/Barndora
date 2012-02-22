@@ -20,7 +20,7 @@ db = SQLite3::Database.new( "data/bandcamp_tags.db" )
 puts(db)
 
 
-genre_tags.each do
+location_tags.each do
 	|tag_name_url|
 
 	tag_url = tag_name_url[0]
@@ -43,8 +43,8 @@ genre_tags.each do
 
 	max_page = tag_page.css('span.pagenum').map{|span| span.text}[-1].to_i
 
-	if max_page > 10
-		max_page = 10
+	if max_page > 2
+		max_page = 2
 	end
 
 	puts("Genre " + tag_name)

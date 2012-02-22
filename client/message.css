@@ -1,44 +1,81 @@
 .hidden_message
 {
 	visibility:hidden;
+	height:0px;
 }
 
-.error_message
+.message
 {
-	background-color:#cc7777;
-
-	height:32px;
-	border-radius:5px;
-}
-
-.warning_message
-{
-	background-color:#DDCC55;
-	height:32px;
-	border-radius:5px;
+	min-height:32px;
+	max-height:250px;
+	overflow:auto;
 
 }
 
-.notice_message
+.message_content
 {
-	background-color:#22DD55;
-	height:32px;
-	border-radius:5px;
+	max-height:250px;
+	
+	font-size:18px;	
+	text-align:justify;
+	margin:10px;
+}
 
+.message_label
+{
+	max-height:250px;
+	overflow:auto;
+}
+
+.bad
+{
+	background-color:#FF9999;
+}
+
+.warning
+{
+	background-color:#FFFF99;
+}
+
+.normal
+{
+	background-color:#FFFFFF;
+}
+
+.good
+{
+	background-color:#99FF99;
 }
 
 .message_container
 {
-	text-align:center;
 
 	width:507px;
-	height:32px;
+
 	
-	border-radius:5px;
 
 	margin-left:auto;
 	margin-right:auto;
 
 	margin-top:10px;
 	margin-bottom:10px;
+}
+
+.info_container
+{
+
+	width:507px;
+
+	height:32px;
+	margin-left:auto;
+	margin-right:auto;
+
+	margin-top:10px;
+	margin-bottom:10px;
+}
+
+.info
+{
+	text-align:center;
+	padding:7px;
 }

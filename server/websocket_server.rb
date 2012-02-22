@@ -34,7 +34,7 @@ class WebsocketServer < EM::WebSocket::Connection
 	def onmessage(msg)
 		command , args = msg.split(':')
 			
-		puts "Command " + command + " Args " + args
+		#puts "Command " + command + " Args " + args
 
 		if command.eql? "next"  
 
@@ -113,6 +113,8 @@ class WebsocketServer < EM::WebSocket::Connection
 				track['band_url'] = 'http://' + band['subdomain'] + '.bandcamp.com'
 			end
 
+			track['message_type'] = 'track'
+
 			#puts "Track " + track['title'] 
 			#puts "Album " + track['album_name'] 
 			#puts "Band " + track['band_name']
@@ -128,13 +130,57 @@ class WebsocketServer < EM::WebSocket::Connection
 			#Lets assume for now that something bad isn't in tags
 			@tags = args.gsub! /"/ , ''
 
+			puts @tags
+
 			if @tags.nil?
 				@tag_selector = 'UNION'
 				@tags = args.split(',')
 			else
 				@tag_selector = 'INTERSECT'
 				@tags = @tags.split(',')
-			end	
+			end
+
+		elsif command.eql? 'about'
+			message = Hash.new
+
+			message['message_type'] = 'normal'
+
+			message['message'] = "Bandora is a cross between <a href='http://bandcamp.com'>Bandcamp</a> and <a href='httP://pandora.com'>Pandora</a>."
+			message['message'] += "</br>"
+			message['message'] += "The source for this project is on <a href='https://github.com/bobschriver/Barndora'>github</a>!"
+
+			send message.to_json.to_s
+
+		elsif command.eql? 'get_tags'
+
+			message = Hash.new
+
+			message['message_type'] = 'normal'
+			message['message'] = ""
+
+			tags_query = "select tag from tags"
+
+			tags = @db.execute(tags_query)
+
+			tags.each do
+				|tag|
+
+				message['message'] += "<a href='#' onclick=\"add_tag('#{tag[0].to_s}')\">#{tag[0].to_s}</a> "
+				#message['message'] += tag[0].to_s + " - "
+			end
+
+			send message.to_json.to_s
+
+		elsif command.eql? 'help'
+			message = Hash.new
+
+			message['message_type'] = 'normal'
+
+			message['message'] = "rock,California = get tracks tagged rock OR California"
+			message['message'] += "</br>&quot;rock,California&quot; = get tracks tagged rock AND California"
+
+			send message.to_json.to_s
+
 		end
 	end
 
@@ -192,7 +238,7 @@ class WebsocketServer < EM::WebSocket::Connection
 
 		if tag_ids.empty?
 			error = Hash.new
-			error['error_type'] = 'no_tags'
+			error['message_type'] = 'error'
 			error['error_message'] = "Sorry, those genres are too hip. I don't have any of those genres indexed!"
 		
 			puts "Couldn't find tags"
@@ -232,7 +278,7 @@ class WebsocketServer < EM::WebSocket::Connection
 
 			if track_ids.empty?
 				error = Hash.new
-				error['error_type'] = 'no_tracks'
+				error['message_type'] = 'error'
 				error['error_message'] = "Sorry, those tags are too hip. I can't find any tracks that match them!"
 
 				puts "Couldnt find tracks"

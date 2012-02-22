@@ -11,7 +11,8 @@
 
 body
 {
-	background-color:#DCDCDC;
+	background-color:#CCCCFF;
+	font-family:Arial, Helvetica, sans-serif;
 }
 
 .header
@@ -30,8 +31,6 @@ body
 	padding-left:10px;
 	padding-right:7px;
 
-	border-radius:15px;
-
 
 	margin-top:20px;
 	margin-bottom:2px;
@@ -39,7 +38,6 @@ body
 	margin-left:auto;
 	margin-right:auto;
 
-	background-color:#99aacc;
 }
 
 .tags_div
@@ -88,32 +86,16 @@ body
 {
 }
 
-.yup_undepressed
+.yup
 {
 	width:166px;
 	height:32px;
 }
 
-.nope_undepressed
+.nope
 {
 	width:166px;
 	height:32px;
-}
-
-.yup_depressed
-{
-	width:166px;
-	height:32px;
-
-	background-color:#99DD99
-}
-
-.nope_depressed
-{
-	width:166px;
-	height:32px;
-
-	background-color:#DD9999
 }
 
 .audio_div
@@ -129,11 +111,60 @@ body
 	width:150px;
 	height:150px;
 
-	margin-right:2px;
+	margin-right:1px;
+
+	border-style:solid;
+	border-width:1px;
 }
 
 .art_img
 {
 	width:150px;
 	height:150px;
+}
+
+.prev_tracks
+{
+	float:right;
+
+	height:512px;
+	width:260px;
+	overflow:auto;
+
+	border-style:solid;
+	border-width:1px;
+}
+
+.prev_track
+{
+	height:64px;
+	margin:5px;
+	padding:5px;
+	
+}
+
+.prev_track_links
+{
+	float:left;
+	position:relative;
+
+	width:170px;
+
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+}
+
+.prev_art_img
+{
+	position:relative;
+	float:left;
+	
+	height:64px;
+	width:64px;
+
+	border-style:solid;
+	border-width:1px;
+
+	margin-right:2px;
 }

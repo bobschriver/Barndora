@@ -12,7 +12,10 @@
 <body onload="init()">
 
 
-<div id = "interface" class = "interface">
+<div id ="prev_tracks" class = "prev_tracks">
+</div>
+
+<div id = "interface" class = "interface normal">
 
 <div id='tags_div' class='tags_div'>
 	<input type="text" id="tags" class="tags" onchange="submit_tags()"></input>
@@ -32,11 +35,11 @@
 
 
 <div id = "rate_div" class = "rate_div">
-	<button id = "yup" class = "yup_undepressed" onclick="rate_yup(this)">yup</button>
-	<button id = "nope" class = "nope_undepressed" onclick="rate_nope(this)">nope</button>
+	<button id = "yup" class = "yup" onclick="rate_yup(this)">yup</button>
+	<button id = "nope" class = "nope" onclick="rate_nope(this)">nope</button>
 </div>
 
-<div id = "track_links" class = "track_links">
+<div id = "track_links" class = "track_links normal">
 	<a id = "band_url" class="track_link" target="_blank" href=""></a></br>
 	<a id = "album_url" class="track_link" target="_blank" href=""></a></br>
 	<a id = "track_url" class = track_link" target="_blank" href=""></a></br>
@@ -49,10 +52,23 @@
 <div id = "message_container_div" class = "message_container">
 
 <div id = "message_div" class = "hidden_message">
+	<div id = "message_content_div" class = "message_content">
 	<label id = "message_label" class = "message_label"></label>
+	</div>
 </div>
 
 </div>
+
+<div id = "info_container_div" class="info_container normal">
+
+	<div id = "info_div" class="info normal">
+	<a id="about_link" href="#" onClick="get_about()">About</a>&nbsp;&nbsp;&nbsp;
+	<a id="tags_link" href="#" onClick="get_tags()">Tags</a>&nbsp;&nbsp;&nbsp;
+	<a id="help_link" href="#" onClick="get_help()">Help</a>&nbsp;&nbsp;&nbsp;
+	<div>
+
+</div>
+
 
 </body>
 

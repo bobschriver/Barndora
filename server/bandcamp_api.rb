@@ -139,13 +139,13 @@ class BandcampAPI
 			band_id = (track_info_json.has_key? 'band_id') ? track_info_json['band_id'] : 'NULL'
 			album_id = (track_info_json.has_key? 'album_id') ? track_info_json['album_id'] : 'NULL'
 			duration = (track_info_json.has_key? 'duration') ? track_info_json['duration'] : 'NULL'
-	
+			title = (track_info_json.has_key? 'title') ? track_info_json['title'] : 'NULL'	
 			
-			query = "insert into track_info (track_id, release_date, downloadable, url, streaming_url, lyrics, small_art_url, large_art_url, band_id, album_id, duration) values (? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ?)"
+			query = "insert into track_info (track_id, release_date, downloadable, url, streaming_url, lyrics, small_art_url, large_art_url, band_id, album_id, duration , title) values (? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ? , ?)"
 
 			track_insert = @db.prepare(query)
 
-			track_insert.execute(track_id , release_date , downloadable , url , streaming_url , lyrics , small_art_url , large_art_url , band_id , album_id , duration)
+			track_insert.execute(track_id , release_date , downloadable , url , streaming_url , lyrics , small_art_url , large_art_url , band_id , album_id , duration , title)
 		else
 
 			#TODO Look into a better way of doing this
@@ -190,6 +190,10 @@ class BandcampAPI
 
 			if not track_info[0][9].nil?
 				track_info_json['album_id'] = track_info[0][9]
+			end
+
+			if not track_info[0][11].nil?
+				track_info_json['title'] = track_info[0][11]
 			end
 		end
 

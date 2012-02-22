@@ -10,11 +10,11 @@ urls = db.execute("select * from urls")
 urls.each do
 	|url|
 	
-	if url[0] > 50000
+	if url[0] > 100000
 		exit
 	end
 
-	if url[0] < 48920
+	if url[0] < 11033
 		next
 	end
 
@@ -45,7 +45,6 @@ urls.each do
 		next
 	end
 
-	puts tracks
 
 	if tracks.nil?
 		puts "Tracks is nil, some sort of problem?"
@@ -54,7 +53,7 @@ urls.each do
 
 	puts "URL " + url[0].to_s + " " + url[1].to_s	
 	puts "Number of tracks" + tracks.length.to_s
-	tracks.map{|track| puts track['track_id']}
+	#tracks.map{|track| puts track['track_id']}
 
 	db.transaction do
 
@@ -65,12 +64,21 @@ urls.each do
 			|track|
 			track_id = track['track_id']
 		
+			#t = db.execute("select tag_id from track_tags where track_id = #{track_id}")
+
+			#missing = tags - t
+
+
+			#if not missing.empty?
+			#puts "Missing"
+			#puts missing
 			#Need to insert all these tags into a new track_tags table
 			tags.each do
 				|tag_id|
 				db.execute("insert into track_tags (track_id , tag_id) values(#{track_id} , #{tag_id})")
 			end
+			#end
 		end
 	end
-	sleep(1)
+	#sleep(1)
 end
