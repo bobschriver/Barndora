@@ -62,6 +62,9 @@ class BandcampAPI
 	end
 	
 	def album_info(album_id)
+	
+		puts album_id
+
 		album_info = @db.execute("select * from album_info where album_id = #{album_id.to_s}")
 	
 

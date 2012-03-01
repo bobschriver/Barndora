@@ -4,7 +4,7 @@ require 'rubygems'
 #yeah this is a bad way of storing my api key whatevs
 require './api_key.rb'
 require './bandcamp_api.rb'
-
+require './bandcamp_site_api.rb'
 require 'bundler/setup'
 
 require 'sqlite3'
@@ -87,6 +87,8 @@ class WebsocketServer < EM::WebSocket::Connection
 			track = BandcampAPI.instance.track_info(track_id)
 
 
+			puts track
+
 			#Need to return the album info
 			album_id = track['album_id']
 			album = BandcampAPI.instance.album_info(album_id)
@@ -145,7 +147,7 @@ class WebsocketServer < EM::WebSocket::Connection
 
 			message['message_type'] = 'normal'
 
-			message['message'] = "Bandora is a cross between <a href='http://bandcamp.com'>Bandcamp</a> and <a href='httP://pandora.com'>Pandora</a>."
+			message['message'] = "Campradio is a tag based radio for <a href='http://bandcamp.com'>Bandcamp</a>"
 			message['message'] += "</br>"
 			message['message'] += "The source for this project is on <a href='https://github.com/bobschriver/Barndora'>github</a>!"
 
@@ -237,15 +239,49 @@ class WebsocketServer < EM::WebSocket::Connection
 		tag_ids = @db.execute(tag_query)
 
 		if tag_ids.empty?
-			error = Hash.new
-			error['message_type'] = 'error'
-			error['error_message'] = "Sorry, those genres are too hip. I don't have any of those genres indexed!"
-		
-			puts "Couldn't find tags"
+			
+			found_tag = false
 
-			send error.to_json.to_s
+			@tags.each do
+				|tag|
+
+				is_tag = BandcampSiteAPI.instance.is_tag(tag)
+
+				is_tag = false 
+
+
+				if is_tag
+					puts "Found new tag" + tag
+
+					warning = Hash.new
+					warning['message_type'] = 'warning'
+					warning['warning_message'] = "I haven't seen those tags before! It might take a few seconds to index them..."
+
+					send warning.to_json.to_s
+
+					found_tag = true
+
+					urls = BandcampSiteAPI.instance.get_tracks_for_tag(tag)
+
+
+					BandcampSiteAPI.instance.update_track_tags(urls)	
+					
+				end
+			end
+				
+
+			if not found_tag
+				error = Hash.new
+				error['message_type'] = 'error'
+				error['error_message'] = "Sorry, those genres are too hip. I don't have any of those genres indexed!"
 		
-			@tags = @prev_tags
+				puts "Couldn't find tags"
+
+				send error.to_json.to_s
+		
+				@tags = @prev_tags
+		
+			end
 		end
 
 		return tag_ids

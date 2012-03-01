@@ -12,7 +12,7 @@
 <body onload="init()">
 
 
-<div id ="prev_tracks" class = "prev_tracks">
+<div id ="prev_tracks" class = "prev_tracks normal">
 </div>
 
 <div id = "interface" class = "interface normal">
@@ -35,14 +35,14 @@
 
 
 <div id = "rate_div" class = "rate_div">
-	<button id = "yup" class = "yup" onclick="rate_yup(this)">yup</button>
-	<button id = "nope" class = "nope" onclick="rate_nope(this)">nope</button>
+	<button id = "yup" class = "yup" onclick="rate_yup(this)">yup, sounds good</button>
+	<button id = "nope" class = "nope" onclick="rate_nope(this)">nope, sounds bad</button>
 </div>
 
 <div id = "track_links" class = "track_links normal">
-	<a id = "band_url" class="track_link" target="_blank" href=""></a></br>
-	<a id = "album_url" class="track_link" target="_blank" href=""></a></br>
-	<a id = "track_url" class = track_link" target="_blank" href=""></a></br>
+	Band: <a id = "band_url" class="track_link" target="_blank" href=""></a></br>
+	Album: <a id = "album_url" class="track_link" target="_blank" href=""></a></br>
+	Track: <a id = "track_url" class = track_link" target="_blank" href=""></a></br>
 </div>
 
 </div>
@@ -65,10 +65,11 @@
 	<a id="about_link" href="#" onClick="get_about()">About</a>&nbsp;&nbsp;&nbsp;
 	<a id="tags_link" href="#" onClick="get_tags()">Tags</a>&nbsp;&nbsp;&nbsp;
 	<a id="help_link" href="#" onClick="get_help()">Help</a>&nbsp;&nbsp;&nbsp;
-	<div>
-
+	</div>
+	<div id = "police_scanner_div" class= "police_scanner hidden_message">
+	<audio src="http://relay.radioreference.com:80/il_chicago_police2" controls></audio>
+	</div>
 </div>
-
 
 </body>
 

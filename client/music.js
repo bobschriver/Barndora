@@ -166,7 +166,7 @@ function init()
 {
 	websocket = new WebSocket("ws://totoro.csh.rit.edu:2015/"); 
 	websocket.onopen = function(evt) { onOpen(evt) }; 
-	//websocket.onclose = function(evt) { onClose(evt) }; 
+	websocket.onclose = function(evt) { onClose(evt) }; 
 	websocket.onmessage = function(evt) { onMessage(evt) }; 
 
  	set_message('Connecting to server...' , 0 , 'warning')	
@@ -175,6 +175,11 @@ function init()
 	yup_depressed = false
 	nope_depressed = false
 	message_recieved = false
+}
+
+function onClose(evt)
+{
+	set_message('Lost connection to server. Try refreshing the page!' , 0 , 'error')
 }
 
 
